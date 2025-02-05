@@ -12,7 +12,6 @@ setup(name='deltapy',
       license='MIT',
       packages=['deltapy'],
       install_requires=[
-            "fbprophet",
             "pandas",
             "pykalman",
             "tsaug",
