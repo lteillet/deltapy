@@ -4,7 +4,6 @@ import statsmodels.api as sm
 from scipy import signal, integrate
 from pykalman import UnscentedKalmanFilter
 from tsaug import *
-from fbprophet import Prophet
 import pylab as pl
 from seasonal.periodogram import periodogram
 
@@ -376,30 +375,6 @@ def multiple_lags(df, start=1, end=3,columns=None):
   return df
 
 # df = multiple_lags(df, start=1, end=3, columns=["Close"])
-
-
-#++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-
-
-def prophet_feat(df, cols,date, freq,train_size=150):
-  def prophet_dataframe(df): 
-    df.columns = ['ds','y']
-    return df
-
-  def original_dataframe(df, freq, name):
-    prophet_pred = pd.DataFrame({"Date" : df['ds'], name : df["yhat"]})
-    prophet_pred = prophet_pred.set_index("Date")
-    #prophet_pred.index.freq = pd.tseries.frequencies.to_offset(freq)
-    return prophet_pred[name].values
-
-  for col in cols:
-    model = Prophet(daily_seasonality=True)
-    fb = model.fit(prophet_dataframe(df[[date, col]].head(train_size)))
-    forecast_len = len(df) - train_size
-    future = model.make_future_dataframe(periods=forecast_len,freq=freq)
-    future_pred = model.predict(future)
-    df[col+"_PROPHET"] = list(original_dataframe(future_pred,freq,col))
-  return df
 
 # df_out  = prophet_feat(df.copy().reset_index(),["Close","Open"],"Date", "D"); df_out.head()
 
