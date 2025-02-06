@@ -608,7 +608,7 @@ def _estimate_friedrich_coefficients(x, m, r):
 #++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 
-def max_langevin_fixed_point(x, r=3, m=30):
+def max_langevin_fixed_point(x, m=3, r=30):
     coeff = _estimate_friedrich_coefficients(x, m, r)
 
     try:
