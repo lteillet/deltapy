@@ -594,7 +594,7 @@ def _estimate_friedrich_coefficients(x, m, r):
     except ValueError:
         return [np.NaN] * (m + 1)
 
-    quantiles = df.groupby('quantiles')
+    quantiles = df.groupby('quantiles', observed=False)
 
     result = pd.DataFrame({'x_mean': quantiles.signal.mean(), 'y_mean': quantiles.delta.mean()})
     result.dropna(inplace=True)
