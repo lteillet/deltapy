@@ -3,7 +3,6 @@ import numpy as np
 from statsmodels.tsa.stattools import acf, adfuller, pacf
 import itertools
 from statsmodels.tsa.ar_model import AR
-from scipy.signal import cwt, find_peaks_cwt, ricker, welch
 from scipy.stats import linregress
 import scipy.stats as stats
 from scipy.stats import kurtosis as _kurt
@@ -428,44 +427,6 @@ def index_mass_quantile(x, param=[{"q": 0.3}]):
         return [("q_{}".format(config["q"]), (np.argmax(mass_centralized >= config["q"])+1)/len(x)) for config in param]
 
 # index_mass_quantile(df["Close"])
-
-
-#++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-
-
-
-cwt_param = [ka for ka in [2,6,9]]
-
-@set_property("fctype", "combiner")
-@set_property("custom", True)
-def number_cwt_peaks(x, param=cwt_param):
-
-    return [("CWTPeak_{}".format(n), len(find_peaks_cwt(vector=x, widths=np.array(list(range(1, n + 1))), wavelet=ricker))) for n in param]
-
-# number_cwt_peaks(df["Close"])
-
-#++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-
-
-#-> In Package
-def spkt_welch_density(x, param=[{"coeff": 5}]):
-    freq, pxx = welch(x, nperseg=min(len(x), 256))
-    coeff = [config["coeff"] for config in param]
-    indices = ["coeff_{}".format(i) for i in coeff]
-
-    if len(pxx) <= np.max(coeff):  # There are fewer data points in the time series than requested coefficients
-
-        # filter coefficients that are not contained in pxx
-        reduced_coeff = [coefficient for coefficient in coeff if len(pxx) > coefficient]
-        not_calculated_coefficients = [coefficient for coefficient in coeff
-                                       if coefficient not in reduced_coeff]
-
-        # Fill up the rest of the requested coefficients with np.NaNs
-        return zip(indices, list(pxx[reduced_coeff]) + [np.NaN] * len(not_calculated_coefficients))
-    else:
-        return pxx[coeff].ravel()[0]
-
-# spkt_welch_density(df["Close"])
 
 
 #++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -916,29 +877,7 @@ def largest_lyauponov_exponent(epochs, param=lyaup_param):
   
 # largest_lyauponov_exponent(df["Close"])
 
-#++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-
-
-whelch_param = [100,200]
-
-@set_property("fctype", "combiner")
-@set_property("custom", True)
-def whelch_method(data, param=whelch_param):
-
-  final = []
-  for Fs in param:
-    f, pxx = signal.welch(data, fs=Fs, nperseg=1024)
-    d = {'psd': pxx, 'freqs': f}
-    df = pd.DataFrame(data=d)
-    dfs = df.sort_values(['psd'], ascending=False)
-    rows = dfs.iloc[:10]
-    final.append(rows['freqs'].mean())
-  
-  return [("Fs_{}".format(pa),fin) for pa, fin in zip(param,final)]
-
-# whelch_method(df["Close"])
-
-#++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+#+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 #-> Basically same as above
 freq_param = [{"fs":50, "sel":15},{"fs":200, "sel":20}]
